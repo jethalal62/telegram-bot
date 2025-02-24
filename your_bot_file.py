@@ -15,7 +15,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS movies
 conn.commit()
 
 # Load Bot Token Securely
-TOKEN = os.getenv('7511109980:AAFNNoKxyp7VOFt6iDulRIiAThjsg_uTOww')  # Use environment variable
+TOKEN = os.getenv('TOKEN')  # Use environment variable
 BASE_LINK = "https://linkvertise.com/1296252/"  # Your Linkvertise main URL
 
 # Function to Generate Unique Slug
