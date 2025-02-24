@@ -57,16 +57,16 @@ def start(update: Update, context: CallbackContext):
 
         if result:
             fastupload_url = result[0]
-            # Send the FastUpload link to the user
             update.message.reply_text(f"Here is your download link: {fastupload_url}")
-            # Alternatively, to send the file directly through Telegram, uncomment the line below and comment out the line above:
-            # update.message.reply_document(fastupload_url)
         else:
             update.message.reply_text("❌ Invalid download link")
     else:
         update.message.reply_text("👋 Welcome to the Movie Bot! Use the Linkvertise link to access the download options.")
 
 def main():
+    if not TOKEN:
+        raise ValueError("No API token provided")
+    
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
