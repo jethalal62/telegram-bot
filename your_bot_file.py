@@ -1,7 +1,8 @@
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes
 import sqlite3
 import hashlib
+import os
 
 # Database setup
 conn = sqlite3.connect('movies.db')
@@ -13,14 +14,14 @@ c.execute('''CREATE TABLE IF NOT EXISTS movies
              linkvertise_id TEXT UNIQUE)''')
 conn.commit()
 
-TOKEN = '7511109980:AAFNNoKxyp7VOFt6iDulRIiAThjsg_uTOww'
+TOKEN = os.getenv('7511109980:AAFNNoKxyp7VOFt6iDulRIiAThjsg_uTOww')
 BASE_LINK = "https://link-hub.net/1296252/"  # Your Linkvertise main URL
 
 def generate_slug(url):
     return hashlib.md5(url.encode()).hexdigest()[:8]
 
 # 1. Admin Command to Add Movies
-def add_movie(update: Update, context: CallbackContext):
+async def add_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         title = context.args[0]
         fastupload_url = context.args[1]
@@ -36,36 +37,34 @@ def add_movie(update: Update, context: CallbackContext):
                  (title, fastupload_url, slug))
         conn.commit()
         
-        update.message.reply_text(f"✅ Added!\n"
-                                 f"Title: {title}\n"
-                                 f"Linkvertise: {linkvertise_url}\n"
-                                 f"Direct: {fastupload_url}")
+        await update.message.reply_text(f"✅ Added!\n"
+                                        f"Title: {title}\n"
+                                        f"Linkvertise: {linkvertise_url}\n"
+                                        f"Direct: {fastupload_url}")
     except:
-        update.message.reply_text("❌ Usage: /add \"Movie Title\" \"FastUpload URL\"")
+        await update.message.reply_text("❌ Usage: /add \"Movie Title\" \"FastUpload URL\"")
 
 # 2. Handle Telegram Bot Redirects
-def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         movie_slug = context.args[0]
         c.execute("SELECT fastupload_url FROM movies WHERE linkvertise_id=?", (movie_slug,))
         result = c.fetchone()
         
         if result:
-            update.message.reply_document(result[0])
+            await update.message.reply_document(result[0])
         else:
-            update.message.reply_text("❌ Invalid download link")
+            await update.message.reply_text("❌ Invalid download link")
     else:
-        update.message.reply_text("👋 Send /add to contribute movies")
+        await update.message.reply_text("👋 Send /add to contribute movies")
 
 def main():
-    updater = Updater(TOKEN)
-    dp = updater.dispatcher
+    application = Application.builder().token(TOKEN).build()
     
-    dp.add_handler(CommandHandler("add", add_movie))
-    dp.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("add", add_movie))
+    application.add_handler(CommandHandler("start", start))
     
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
