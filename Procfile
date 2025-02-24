@@ -1,1 +1,2 @@
-web: python your_bot_file.py
+worker: python your_bot_file.py
+
