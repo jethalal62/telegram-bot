@@ -72,7 +72,10 @@ def start(update: Update, context: CallbackContext):
 
 # 3. Start the Bot
 def main():
-    updater = Updater(TOKEN, use_context=True)
+   from telegram.ext import Application
+
+updater = Application.builder().token(TOKEN).build()
+
     dp = updater.dispatcher
     
     dp.add_handler(CommandHandler("add", add_movie))
